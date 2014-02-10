@@ -12,24 +12,24 @@ desired traffic and redirect it to your local proxy.
 Assuming you want to proxy (or snat) the 80 port, and your proxy is
 listening on port 2002, execute:
 
- # sysctl net.ipv4.ip_forward=0
- # iptables -t mangle -A PREROUTING -p tcp --dport 80 -j TPROXY --tproxy-mark 0x1/0x1 --on-port 2002
- # iptables -t mangle -N DIVERT
- # iptables -t mangle -A PREROUTING -p tcp -m socket -j DIVERT
- # iptables -t mangle -A DIVERT -j MARK --set-mark 1
- # iptables -t mangle -A DIVERT -j ACCEPT
- # ip rule add fwmark 1 lookup 100
- # ip route add local 0.0.0.0/0 dev lo table 100
- # ulimit -n 999999
+    # sysctl net.ipv4.ip_forward=0
+    # iptables -t mangle -A PREROUTING -p tcp --dport 80 -j TPROXY --tproxy-mark 0x1/0x1 --on-port 2002
+    # iptables -t mangle -N DIVERT
+    # iptables -t mangle -A PREROUTING -p tcp -m socket -j DIVERT
+    # iptables -t mangle -A DIVERT -j MARK --set-mark 1
+    # iptables -t mangle -A DIVERT -j ACCEPT
+    # ip rule add fwmark 1 lookup 100
+    # ip route add local 0.0.0.0/0 dev lo table 100
+    # ulimit -n 999999
 
 Now invoke the tproxy. 
 
 For case 1:
- # tproxy -p 2002
+    # tproxy -p 2002
 where 2002 is the local port to bind to.
 
 For case 2:
- # tproxy -p 2002 -o eth0
+    # tproxy -p 2002 -o eth0
 where eth0 is the interface from which the SNATed traffic will leave,
 using the primary IP address of the interface for IP tranlation.
 
