@@ -223,6 +223,11 @@ static void read_cb(EV_P_ struct ev_io *w, int revents) {
 					exit(EXIT_FAILURE);
 				}
 
+				if(setsockopt(f->egress.sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value)) != 0) {
+					fprintf(stderr, "Error calling setsockopt(): %s\n", strerror(errno));
+					exit(EXIT_FAILURE);
+				}
+
 				if (nat_enabled) {
 					if (bind(f->egress.sock, &nat_addr, sizeof(struct sockaddr)) < 0) {
 						fprintf(stderr, "Error calling bind(): %s\n", strerror(errno));
@@ -373,6 +378,11 @@ static int start_tproxy(void) {
 	}
 
 	if(setsockopt(tproxy_sock, SOL_SOCKET, SO_KEEPALIVE, &value, sizeof(value)) < 0) {
+		fprintf(stderr, "Error calling setsockopt(): %s\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	if(setsockopt(tproxy_sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value)) != 0) {
 		fprintf(stderr, "Error calling setsockopt(): %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
