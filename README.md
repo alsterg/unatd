@@ -25,11 +25,15 @@ listening on port 2002, execute:
 Now invoke the tproxy. 
 
 For case 1:
+
     # tproxy -p 2002
+
 where 2002 is the local port to bind to.
 
 For case 2:
+
     # tproxy -p 2002 -o eth0
+
 where eth0 is the interface from which the SNATed traffic will leave,
 using the primary IP address of the interface for IP tranlation.
 
