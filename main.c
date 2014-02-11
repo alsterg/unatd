@@ -1,10 +1,6 @@
 /* TODO:
-	* README
-	* SNATing
 	* Daemon
 	* Configurability
-	* asserting
-	* Thread affinity
 	* IPv6
 	* UPD
 	* Protocol modularity
@@ -25,10 +21,10 @@
 #include <net/if.h>
 #include <ev.h>
 
-#define LOG // 
+#define LOG // printf
 #define TPROXY_PORT (2002)
 #define LISTEN_BACKLOG (1024)
-#define BUFFER (1024)
+#define BUFFER (32768)
 
 struct ev_loop *loop;
 
