@@ -1,3 +1,5 @@
+/* Copyright 2014 - Alexandros Stergiakis. All rights reserved. */
+
 /* TODO:
 	* Daemon
 	* Configurability
