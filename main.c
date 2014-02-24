@@ -1,4 +1,4 @@
-/* Copyright 2014 - Alexandros Stergiakis. All rights reserved. */
+/* Copyright 2014 - (See AUTHORS.txt) . All rights reserved. */
 
 /* TODO:
 	* Daemon
