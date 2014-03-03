@@ -1,13 +1,5 @@
 /* Copyright 2014 - (See AUTHORS.txt) . All rights reserved. */
 
-/* TODO:
-	* Daemon
-	* Configurability
-	* IPv6
-	* UPD
-	* Protocol modularity
-*/
-
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
