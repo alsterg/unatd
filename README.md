@@ -9,7 +9,7 @@ This program can serve two purposes:
 
 In either case, you have to configure your box to intercept the
 desired traffic and redirect it to your local proxy. 
-Assuming you want to proxy (or snat) the 80 port, and your proxy is
+Assuming you want to proxy (or snat) the 80 port, and unatd is
 listening on port 2002, execute:
 
     # sysctl net.ipv4.ip_forward=0
@@ -39,3 +39,8 @@ using the primary IP address of the interface for IP tranlation.
 
 If you want to allow non-http traffic to pass through, then you have
 to enable forwarding, and populate the routing table accordingly.
+
+Performance tuning: It is recommended to run multiple instances of 
+unatd simultaneously, listening on different ports, and load-balancing
+the traffic among them. One way to load balance the traffic is with
+the --cpu match of iptables.
