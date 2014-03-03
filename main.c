@@ -24,16 +24,16 @@
 #include <ev.h>
 
 #define LOG // printf
-#define TPROXY_PORT (2002)
+#define UNATD_PORT (2002)
 #define LISTEN_BACKLOG (1024)
 #define BUFFER (32768)
 
 struct ev_loop *loop;
 
-int       tproxy_sock;
-short int tproxy_port = TPROXY_PORT;
-struct    sockaddr_in tproxy_addr;
-ev_io     tproxy_watcher;
+int       unatd_sock;
+short int unatd_port = UNATD_PORT;
+struct    sockaddr_in unatd_addr;
+ev_io     unatd_watcher;
 
 struct    sockaddr nat_addr;
 int nat_enabled = 0;
@@ -310,8 +310,8 @@ static void read_cb(EV_P_ struct ev_io *w, int revents) {
 	}
 }
 
-static void tproxy_cb(EV_P_ struct ev_io *w, int revents) {
-	LOG("tproxy_cb\n");
+static void unatd_cb(EV_P_ struct ev_io *w, int revents) {
+	LOG("unatd_cb\n");
 
 	if (revents & EV_ERROR) {
 		fprintf(stderr, "EV_ERROR encountered\n");
@@ -323,7 +323,7 @@ static void tproxy_cb(EV_P_ struct ev_io *w, int revents) {
 
 	/* Accept and save client IP address */
 	f->ingress.addr_len = sizeof(struct sockaddr);
-	if ((f->ingress.sock = accept4(tproxy_sock, &f->ingress.addr, &f->ingress.addr_len, SOCK_NONBLOCK) ) < 0) {
+	if ((f->ingress.sock = accept4(unatd_sock, &f->ingress.addr, &f->ingress.addr_len, SOCK_NONBLOCK) ) < 0) {
 		fprintf(stderr, "Error calling accept(): %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
@@ -355,53 +355,53 @@ static void tproxy_cb(EV_P_ struct ev_io *w, int revents) {
 	f->ingress.state = CONN_OPEN;
 
 	/* Don't handle opening of server-side connection here,
-	 * to avoid adding delay to tproxy_cb. Instead mark
+	 * to avoid adding delay to unatd_cb. Instead mark
 	 * the incomplete state, and handle it in read_cb */
 	f->state = FLOW_HALFOPEN;
 }
 
-static int start_tproxy(void) {
+static int start_unatd(void) {
 	LOG("Proxy started\n");
 
 	/*  Create the listening socket  */
-	if ((tproxy_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+	if ((unatd_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		fprintf(stderr, "Error creating listening socket: %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
 	int value = 1;
-	if (setsockopt(tproxy_sock, SOL_IP, IP_TRANSPARENT, &value, sizeof(value)) < 0) {
+	if (setsockopt(unatd_sock, SOL_IP, IP_TRANSPARENT, &value, sizeof(value)) < 0) {
 		fprintf(stderr, "Error calling setsockopt(): %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
-	if(setsockopt(tproxy_sock, SOL_SOCKET, SO_KEEPALIVE, &value, sizeof(value)) < 0) {
+	if(setsockopt(unatd_sock, SOL_SOCKET, SO_KEEPALIVE, &value, sizeof(value)) < 0) {
 		fprintf(stderr, "Error calling setsockopt(): %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
-	if(setsockopt(tproxy_sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value)) != 0) {
+	if(setsockopt(unatd_sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value)) != 0) {
 		fprintf(stderr, "Error calling setsockopt(): %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
-	memset(&tproxy_addr, 0, sizeof(tproxy_addr));
-	tproxy_addr.sin_family      = AF_INET;
-	tproxy_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	tproxy_addr.sin_port        = htons(tproxy_port);
+	memset(&unatd_addr, 0, sizeof(unatd_addr));
+	unatd_addr.sin_family      = AF_INET;
+	unatd_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	unatd_addr.sin_port        = htons(unatd_port);
 
-	if (bind(tproxy_sock, (struct sockaddr *) &tproxy_addr, sizeof(tproxy_addr)) < 0) {
+	if (bind(unatd_sock, (struct sockaddr *) &unatd_addr, sizeof(unatd_addr)) < 0) {
 		fprintf(stderr, "Error calling bind(): %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
-	if (listen(tproxy_sock, LISTEN_BACKLOG) < 0) {
+	if (listen(unatd_sock, LISTEN_BACKLOG) < 0) {
 		fprintf(stderr, "Error calling listen(): %s\n", strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 
-	ev_io_init(&tproxy_watcher, tproxy_cb, tproxy_sock, EV_READ);
-	ev_io_start(loop, &tproxy_watcher);
+	ev_io_init(&unatd_watcher, unatd_cb, unatd_sock, EV_READ);
+	ev_io_start(loop, &unatd_watcher);
 }
 
 int main(int argc, char **argv)
@@ -413,8 +413,8 @@ int main(int argc, char **argv)
 		switch (c)
 		{
 			case 'p':
-				tproxy_port = atoi(optarg);
-				printf("Binding to port %d\n", tproxy_port);
+				unatd_port = atoi(optarg);
+				printf("Binding to port %d\n", unatd_port);
 				break;
 			case 'n':
 				nat_enabled = 1;
@@ -443,7 +443,7 @@ int main(int argc, char **argv)
 
 	loop = ev_default_loop(0);
 
-	start_tproxy();
+	start_unatd();
 
 	ev_loop(loop, 0); // Enter event-loop
 
