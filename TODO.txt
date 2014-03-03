@@ -2,6 +2,6 @@
 	* Daemonize, and log to syslog
 	* Configurability of IPs to use for translation
 	* IPv6 support + test
-	* UPD nating
+	* UDP/ICMP nating
 	* Payload manipulation through modules
 	* Drop root privileges after initialization
